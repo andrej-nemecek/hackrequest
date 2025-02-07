@@ -1,39 +1,40 @@
 "use client"
+import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 
 export default function SendNotificationPage() {
-    const handleSlackRequest = async () => {
-        try {
-            const response = await fetch('/api/slackhook', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: 'AHA VRABO NOTIFIKACIA' }),
-            });
+    const [notificationSent, setNotificationSent] = useState(false);
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+    useEffect(() => {
+        const handleSlackRequest = async () => {
+            try {
+                const response = await fetch('/api/slackhook', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: 'AHA VRABO NOTIFIKACIA' }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                console.log('Success:', result);
+                setNotificationSent(true);
+            } catch (error) {
+                console.error('Error:', error);
             }
+        };
 
-            const result = await response.json();
-            console.log('Success:', result);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
+        handleSlackRequest();
+    }, []);
 
     return (
         <div className="container mx-auto p-4">
             <Card className="max-w-2xl mx-auto">
-                <CardHeader>
-                    <CardTitle>Send Notification</CardTitle>
-                    <CardDescription>Click the button below to send a notification.</CardDescription>
+                <CardHeader className='text-center'>
+                    <CardTitle> {notificationSent ? 'Notification sent' : 'Sending notification...'}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <Button type="button" className="w-full" onClick={handleSlackRequest}>
-                        Send
-                    </Button>
-                </CardContent>
             </Card>
         </div>
     )
