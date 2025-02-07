@@ -1,7 +1,7 @@
 import { db } from "@/db/db";
-import { tickets, users } from "@/db/schema";
+import { projects, tickets, userProjects, users } from "@/db/schema";
 import { ticketSchema } from "@/lib/schemas";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -15,17 +15,32 @@ export async function POST(req: NextRequest) {
     const validatedData = ticketSchema.parse(parsedBody);
 
     // Find user by an email in DB
-    const user = await db
+    const project = await db
       .select()
-      .from(users)
-      .where(eq(users.email, validatedData.email));
+      .from(projects)
+      .where(eq(projects.id, validatedData.projectId));
+
+    // Find user by email and check if they are connected to the provided projectId
+    const userProject = await db
+      .select()
+      .from(userProjects)
+      .innerJoin(users, eq(userProjects.userId, users.id))
+      .innerJoin(projects, eq(userProjects.projectId, projects.id))
+      .where(
+        and(
+          eq(users.email, validatedData.email),
+          eq(projects.id, validatedData.projectId)
+        )
+      );
 
     // If user is found, add the new ticket into the user's tickets
-    if (user.length > 0) {
+    if (userProject.length > 0) {
       // Get the first one, as we only expect one user with the same email
-      await db
-        .insert(tickets)
-        .values({ ...validatedData, clientId: user[0].id, status: "received" });
+      await db.insert(tickets).values({
+        ...validatedData,
+        projectId: userProject[0].user_projects.projectId,
+        status: "received",
+      });
     }
 
     // TODO: Send an email to the user
