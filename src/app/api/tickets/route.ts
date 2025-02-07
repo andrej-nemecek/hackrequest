@@ -31,11 +31,14 @@ export async function POST(req: NextRequest) {
     // If user is found, add the new ticket into the user's tickets
     if (userProject.length > 0) {
       // Get the first one, as we only expect one user with the same email
-      await db.insert(tickets).values({
-        ...validatedData,
-        projectId: userProject[0].user_projects.projectId,
-        status: "received",
-      });
+      const ticket = await db
+        .insert(tickets)
+        .values({
+          ...validatedData,
+          projectId: userProject[0].user_projects.projectId,
+          status: "received",
+        })
+        .returning({ id: tickets.id });
 
       const transporter = nodemailer.createTransport({
         port: 587,
@@ -48,10 +51,10 @@ export async function POST(req: NextRequest) {
 
       transporter.sendMail(
         {
-          from: "andrej.nemecek@goodrequest.com",
+          from: process.env.SMTP_SENDER,
           to: validatedData.email,
           subject: "Ticket received",
-          text: "Your ticket has been received",
+          html: `<p>Your ticket has been received. Please confirm your ticket clicking on the link below.</p><a href="${process.env.BASE_URL}/tickets/${ticket[0].id}">Confirm ticket</a>`,
         },
         (err) => {
           if (err) console.log(err);
