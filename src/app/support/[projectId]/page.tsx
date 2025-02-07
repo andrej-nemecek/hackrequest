@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from "@/components/ui/button"
@@ -8,10 +8,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { ticketSchema, TicketFormData } from "@/lib/schemas";
+import { useParams } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function SupportRequestPage() {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+
+
+    const { projectId } = useParams();
+
+
+
+
     const {
         register,
         handleSubmit,
@@ -20,11 +32,18 @@ export default function SupportRequestPage() {
     } = useForm<TicketFormData>({
         resolver: zodResolver(ticketSchema),
         defaultValues: {
-            projectId: 'f0588c2d-e6ae-4d8d-9469-3993bfa608d4', // Replace with your actual default project ID
+            projectId: String(projectId) ?? '', // Use projectId from useParams or an empty string if not available
         },
     });
 
+
+
+
+
     const onSubmit: SubmitHandler<TicketFormData> = async (data) => {
+        setIsSubmitting(true)
+        setSubmitStatus("idle")
+
         try {
             const response = await fetch('/api/tickets', {
                 method: 'POST',
@@ -38,16 +57,22 @@ export default function SupportRequestPage() {
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.json();
-            console.log('Success:', result);
+            await response.json();
+            setSubmitStatus("success")
         } catch (error) {
+            setSubmitStatus("error")
             console.error('Error:', error);
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
 
     return (
-        <div className="container mx-auto p-4">
+
+
+
+        < div className="container mx-auto p-4" >
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
                     <CardTitle>Support Request Form</CardTitle>
@@ -110,12 +135,30 @@ export default function SupportRequestPage() {
                             />
                             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
                         </div>
-                        <Button type="submit" className="w-full">
-                            Submit Request
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? "Submitting..." : "Submit Request"}
                         </Button>
 
                     </form>
                 </CardContent>
+                <CardFooter>
+                    {submitStatus === "success" && (
+                        <Alert className="w-full">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <AlertTitle>Success</AlertTitle>
+                            <AlertDescription>
+                                Your ticket was successfully submitted. Please check your email to confirm the request.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    {submitStatus === "error" && (
+                        <Alert variant="destructive" className="w-full">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>There was a problem submitting your request. Please try again later.</AlertDescription>
+                        </Alert>
+                    )}
+                </CardFooter>
             </Card>
         </div >
     )
