@@ -67,6 +67,7 @@ export default function SupportRequestPage() {
         }
     }
 
+
     return (
 
 
@@ -137,6 +138,7 @@ export default function SupportRequestPage() {
                         <Button type="submit" className="w-full" disabled={isSubmitting}>
                             {isSubmitting ? "Submitting..." : "Submit Request"}
                         </Button>
+
                     </form>
                 </CardContent>
                 <CardFooter>
