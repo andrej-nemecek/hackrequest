@@ -18,5 +18,10 @@ export const tickets = pgTable("tickets", {
   description: text("description"),
   type: text("type"),
   status: text("status"),
-  clientId: uuid("client_id"),
+  projectId: uuid("project_id"),
+});
+
+export const userProjects = pgTable("user_projects", {
+  userId: uuid("user_id").references(() => users.id),
+  projectId: uuid("project_id").references(() => projects.id),
 });
