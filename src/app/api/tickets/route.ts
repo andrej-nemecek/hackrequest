@@ -3,6 +3,7 @@ import { projects, tickets, userProjects, users } from "@/db/schema";
 import { ticketSchema } from "@/lib/schemas";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,12 +14,6 @@ export async function POST(req: NextRequest) {
       );
     const parsedBody = await req.json();
     const validatedData = ticketSchema.parse(parsedBody);
-
-    // Find user by an email in DB
-    const project = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, validatedData.projectId));
 
     // Find user by email and check if they are connected to the provided projectId
     const userProject = await db
@@ -36,14 +31,37 @@ export async function POST(req: NextRequest) {
     // If user is found, add the new ticket into the user's tickets
     if (userProject.length > 0) {
       // Get the first one, as we only expect one user with the same email
-      await db.insert(tickets).values({
-        ...validatedData,
-        projectId: userProject[0].user_projects.projectId,
-        status: "received",
-      });
-    }
+      const ticket = await db
+        .insert(tickets)
+        .values({
+          ...validatedData,
+          projectId: userProject[0].user_projects.projectId,
+          status: "received",
+        })
+        .returning({ id: tickets.id });
 
-    // TODO: Send an email to the user
+      const transporter = nodemailer.createTransport({
+        port: 587,
+        host: process.env.SMTP_HOST,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      transporter.sendMail(
+        {
+          from: process.env.SMTP_SENDER,
+          to: validatedData.email,
+          subject: "Ticket received",
+          html: `<p>Your ticket has been received. Please confirm your ticket clicking on the link below.</p><a href="${process.env.BASE_URL}/tickets/verify/${ticket[0].id}">Confirm ticket</a>`,
+        },
+        (err) => {
+          if (err) console.log(err);
+          else console.log("Email sent");
+        }
+      );
+    }
 
     return NextResponse.json({ message: "Ticket received" }, { status: 201 });
   } catch (e) {
