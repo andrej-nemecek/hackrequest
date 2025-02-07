@@ -38,7 +38,19 @@ export async function POST(req: NextRequest) {
           projectId: userProject[0].user_projects.projectId,
           status: "received",
         })
-        .returning({ id: tickets.id });
+          .returning({
+            id: tickets.id,
+            email: tickets.email,
+            summary: tickets.summary,
+            description: tickets.description,
+            type: tickets.type,
+            projectId: tickets.projectId,
+          });
+
+      const project = await db
+          .select()
+          .from(projects)
+          .where(eq(projects.id, validatedData.projectId));
 
       const transporter = nodemailer.createTransport({
         port: 587,
@@ -54,7 +66,27 @@ export async function POST(req: NextRequest) {
           from: process.env.SMTP_SENDER,
           to: validatedData.email,
           subject: "Ticket received",
-          html: `<p>Your ticket has been received. Please confirm your ticket clicking on the link below.</p><a href="${process.env.BASE_URL}/tickets/verify/${ticket[0].id}">Confirm ticket</a>`,
+          html: `<div style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+                  <h2>Ticket received</h2>
+                  <p>Hi ${ticket[0].email},</p>
+                
+                 <p>Thank you for reaching out to us! We’re happy to inform you that your support ticket has been successfully created.</p>
+                 <p><strong>Ticket ID:</strong> ${ticket[0].id}</p>
+                 <p><strong>Project:</strong> ${project[0].name}</p>
+                 <p><strong>Summary:</strong> ${ticket[0].summary}</p>
+                 <p><strong>Description:</strong> ${ticket[0].description}</p>
+                 
+           <div style="text-align: center">
+          <p>
+          Our team will be reviewing your request after your confirmation, and someone from our support team will get in touch with you shortly to assist further.
+          Thank you for your patience, and we look forward to resolving your issue!</p>
+          
+          <a href="${process.env.BASE_URL}/tickets/verify/${ticket[0].id}" 
+             style="background-color: #888; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
+             Confirm Ticket
+        </a>
+        </div>
+        </div>`,
         },
         (err) => {
           if (err) console.log(err);
