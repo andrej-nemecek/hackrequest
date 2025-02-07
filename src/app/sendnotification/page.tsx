@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function SendNotificationPage() {
     const [notificationSent, setNotificationSent] = useState(false);
