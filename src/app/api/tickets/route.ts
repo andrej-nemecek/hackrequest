@@ -3,6 +3,7 @@ import { projects, tickets, userProjects, users } from "@/db/schema";
 import { ticketSchema } from "@/lib/schemas";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,11 +15,7 @@ export async function POST(req: NextRequest) {
     const parsedBody = await req.json();
     const validatedData = ticketSchema.parse(parsedBody);
 
-    // Find user by an email in DB
-    const project = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, validatedData.projectId));
+    const resend = new Resend(process.env.DATABASE_URL);
 
     // Find user by email and check if they are connected to the provided projectId
     const userProject = await db
@@ -41,9 +38,15 @@ export async function POST(req: NextRequest) {
         projectId: userProject[0].user_projects.projectId,
         status: "received",
       });
-    }
 
-    // TODO: Send an email to the user
+      // Send email to the user
+      resend.emails.send({
+        from: "HackRequest <info@rbalcercik.sk>",
+        to: validatedData.email,
+        subject: "Ticket received",
+        html: `<p>Your ticket has been received. Confirm.</p>`,
+      });
+    }
 
     return NextResponse.json({ message: "Ticket received" }, { status: 201 });
   } catch (e) {
