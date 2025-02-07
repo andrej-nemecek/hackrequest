@@ -1,3 +1,4 @@
+import { boolean } from "drizzle-orm/pg-core";
 import { pgTable, text, uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -19,6 +20,8 @@ export const tickets = pgTable("tickets", {
   type: text("type"),
   status: text("status"),
   projectId: uuid("project_id"),
+  created_at: text("created_at"),
+  confirmed: boolean("confirmed").default(false),
 });
 
 export const userProjects = pgTable("user_projects", {
