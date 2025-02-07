@@ -19,6 +19,9 @@ export default function SupportRequestPage() {
         control,
     } = useForm<TicketFormData>({
         resolver: zodResolver(ticketSchema),
+        defaultValues: {
+            projectId: 'f0588c2d-e6ae-4d8d-9469-3993bfa608d4', // Replace with your actual default project ID
+        },
     });
 
     const onSubmit: SubmitHandler<TicketFormData> = async (data) => {
@@ -125,7 +128,7 @@ export default function SupportRequestPage() {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     )
 }
 
