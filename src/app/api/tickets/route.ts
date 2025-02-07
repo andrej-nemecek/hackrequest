@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
                   <h2>Ticket received</h2>
                   <p>Hi ${ticket[0].email},</p>
                 
-                 <p>Thank you for reaching out to us! We’re happy to inform you that your support ticket has been successfully created.</p>
+                 <p>thank you for reaching out to us! We’re happy to inform you that your support ticket has been successfully created.</p>
                  <p><strong>Ticket ID:</strong> ${ticket[0].id}</p>
                  <p><strong>Project:</strong> ${project[0].name}</p>
                  <p><strong>Summary:</strong> ${ticket[0].summary}</p>
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
           Our team will be reviewing your request after your confirmation, and someone from our support team will get in touch with you shortly to assist further.
           Thank you for your patience, and we look forward to resolving your issue!</p>
           
-          <a href="${process.env.BASE_URL}/tickets/verify/${ticket[0].id}" 
+          <a href="${process.env.BASE_URL}/api/tickets/verify/${ticket[0].id}" 
              style="background-color: #888; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
              Confirm Ticket
         </a>
@@ -121,6 +121,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(ticket[0], { status: 200 });
   } catch (e) {
-    return NextResponse.json({ message: e.message }, { status: 500 });
+    return NextResponse.json({ message: e }, { status: 500 });
   }
 }

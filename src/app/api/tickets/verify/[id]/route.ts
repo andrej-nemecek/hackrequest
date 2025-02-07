@@ -56,7 +56,7 @@ export async function GET(
 
       const webhookURL = process.env.SLACK_WEBHOOK_URL;
       if (webhookURL) {
-        const response = await fetch(webhookURL, {
+        await fetch(webhookURL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -102,9 +102,6 @@ export async function GET(
             ],
           }),
         });
-
-        console.log(response.body);
-        // http://localhost:3000/api/tickets/verify/40555140-71dc-4a4f-831e-3d6f7838a0aa
       }
 
       return NextResponse.redirect(url.toString());
