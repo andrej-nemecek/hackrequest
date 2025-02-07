@@ -45,15 +45,6 @@ export default function SupportRequestPage() {
         }
     }
 
-    const handleSlackRequest = async () => {
-        const webhookUrl = 'https://hooks.slack.com/services/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'
-
-        await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: 'AHA VRABO NOTIFIKACIA' }),
-        });
-    }
 
     return (
         <div className="container mx-auto p-4">
@@ -122,9 +113,7 @@ export default function SupportRequestPage() {
                         <Button type="submit" className="w-full">
                             Submit Request
                         </Button>
-                        <Button type="button" className="w-full" onClick={() => handleSlackRequest()}>
-                            Posli do slacku
-                        </Button>
+
                     </form>
                 </CardContent>
             </Card>
