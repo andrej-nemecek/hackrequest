@@ -17,12 +17,7 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react';
 export default function SupportRequestPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
-
-
     const { projectId } = useParams();
-
-
-
 
     const {
         register,
