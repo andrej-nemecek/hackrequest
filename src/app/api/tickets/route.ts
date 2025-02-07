@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           from: process.env.SMTP_SENDER,
           to: validatedData.email,
           subject: "Ticket received",
-          html: `<p>Your ticket has been received. Please confirm your ticket clicking on the link below.</p><a href="${process.env.BASE_URL}/tickets/${ticket[0].id}">Confirm ticket</a>`,
+          html: `<p>Your ticket has been received. Please confirm your ticket clicking on the link below.</p><a href="${process.env.BASE_URL}/tickets/verify/${ticket[0].id}">Confirm ticket</a>`,
         },
         (err) => {
           if (err) console.log(err);
