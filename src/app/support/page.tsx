@@ -45,6 +45,7 @@ export default function SupportRequestPage() {
         }
     }
 
+
     return (
         <div className="container mx-auto p-4">
             <Card className="max-w-2xl mx-auto">
@@ -112,6 +113,7 @@ export default function SupportRequestPage() {
                         <Button type="submit" className="w-full">
                             Submit Request
                         </Button>
+
                     </form>
                 </CardContent>
             </Card>
