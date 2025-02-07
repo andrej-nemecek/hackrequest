@@ -3,7 +3,7 @@ import { projects, tickets, userProjects, users } from "@/db/schema";
 import { ticketSchema } from "@/lib/schemas";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
       );
     const parsedBody = await req.json();
     const validatedData = ticketSchema.parse(parsedBody);
-
-    const resend = new Resend(process.env.DATABASE_URL);
 
     // Find user by email and check if they are connected to the provided projectId
     const userProject = await db
@@ -39,13 +37,27 @@ export async function POST(req: NextRequest) {
         status: "received",
       });
 
-      // Send email to the user
-      resend.emails.send({
-        from: "HackRequest <info@rbalcercik.sk>",
-        to: validatedData.email,
-        subject: "Ticket received",
-        html: `<p>Your ticket has been received. Confirm.</p>`,
+      const transporter = nodemailer.createTransport({
+        port: 587,
+        host: process.env.SMTP_HOST,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
       });
+
+      transporter.sendMail(
+        {
+          from: "andrej.nemecek@goodrequest.com",
+          to: validatedData.email,
+          subject: "Ticket received",
+          text: "Your ticket has been received",
+        },
+        (err) => {
+          if (err) console.log(err);
+          else console.log("Email sent");
+        }
+      );
     }
 
     return NextResponse.json({ message: "Ticket received" }, { status: 201 });
