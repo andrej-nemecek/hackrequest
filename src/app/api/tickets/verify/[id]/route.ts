@@ -66,7 +66,7 @@ export async function GET(
                 type: "header",
                 text: {
                   type: "plain_text",
-                  text: `New ticket from ${ticket.email} in project ${project[0].name}`,
+                  text: `:rocket: :rocket: New ticket from ${ticket.email} in project ${project[0].name}`,
                 },
               },
               {
