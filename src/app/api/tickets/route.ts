@@ -50,3 +50,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: e }, { status: 500 });
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "No ID provided" },
+        { status: 400 }
+      );
+    }
+
+    const ticket = await db
+      .select()
+      .from(tickets)
+      .where(eq(tickets.id, id));
+
+    if (!ticket) {
+      return NextResponse.json(
+        { message: "Ticket not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(ticket[0], { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ message: e.message }, { status: 500 });
+  }
+}
